@@ -1,0 +1,34 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "jasmine": true
+  },
+  "rules": {
+    "@typescript-eslint/array-type": "error",
+    "no-empty-function": "off",
+    "@typescript-eslint/no-empty-function": [
+      "warn",
+      {
+        "allow": [
+          "decoratedFunctions",
+          "constructors",
+          "methods"
+        ]
+      }
+    ]
+  }
+}
