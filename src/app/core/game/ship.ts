@@ -2,23 +2,23 @@ import { IdCounter } from '../../shared/id-counter';
 import { ShipType } from './ship-type';
 
 export class Ship {
+  private shipID: number;
+  private shipStructure: boolean[];
   private static idCounter = new IdCounter();
-  id: number;
-  shipStructure: boolean[];
 
+  /** Creates a new ship. */
   constructor(shipType: ShipType) {
-    this.id = Ship.idCounter.nextId();
+    this.shipID = Ship.idCounter.nextId();
     this.shipStructure = new Array(shipType.size).fill(false);
   }
 
-  getId(): number {
-    return this.id;
+  /** The ship's ID. */
+  get id(): number {
+    return this.shipID;
   }
 
-  /**
-   * @returns The size of the ship.
-   */
-  getSize(): number {
+  /** The ship's size. */
+  get size(): number {
     return this.shipStructure.length;
   }
 
@@ -30,7 +30,7 @@ export class Ship {
    * @returns true if the ship was hit; false otherwise.
    */
   hit(pos: number): boolean {
-    if (pos >= 0 && pos < this.getSize()) {
+    if (pos >= 0 && pos < this.size) {
       this.shipStructure[pos] = true;
       return true;
     } else {
