@@ -1,10 +1,10 @@
-import { IdCounter } from './id-counter';
+import { IdGenerator } from './id-generator';
 
 describe('ID Counter', () => {
   let counter;
 
   beforeEach(() => {
-    counter = new IdCounter();
+    counter = new IdGenerator();
   });
 
   it('Should create IDs greater than 0', () => {

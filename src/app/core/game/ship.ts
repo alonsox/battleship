@@ -1,10 +1,10 @@
-import { IdCounter } from '../../shared/id-counter';
+import { IdGenerator } from '../../shared/id-generator';
 import { ShipType } from './ship-type';
 
 export class Ship {
   private shipID: number;
   private shipStructure: boolean[];
-  private static idCounter = new IdCounter();
+  private static idCounter = new IdGenerator();
 
   /** Creates a new ship. */
   constructor(shipType: ShipType) {
