@@ -13,3 +13,12 @@ export interface IGridPoint {
   row: number; // A row of the grid
   col: number; // A column of the grid
 }
+
+export interface IAttack {
+  attackedPlayerId: number;
+  attackedPoint: IGridPoint;
+}
+
+export interface IAttackReport extends IAttack {
+  hasAttackedPlayerLost: boolean;
+}
