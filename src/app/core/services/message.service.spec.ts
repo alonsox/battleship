@@ -5,7 +5,7 @@ import { IMessage } from '../interfaces';
 import { MessageStatus } from '../enums';
 import { Subscription } from 'rxjs';
 
-fdescribe('MessageService', () => {
+describe('MessageService', () => {
   let message$: MessageService;
 
   beforeEach(() => {
