@@ -1,3 +1,10 @@
+import { MessageStatus } from './enums';
+
+export interface IMessage {
+  body: string;
+  status: MessageStatus;
+}
+
 export interface IBoardCell {
   // true for hit, false otherwise
   hit: boolean;

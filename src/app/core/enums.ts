@@ -4,3 +4,9 @@ export enum Direction {
   Left = 'left',
   Right = 'right',
 }
+
+export enum MessageStatus {
+  Error = 'error',
+  Warning = 'warning',
+  OK = 'ok',
+}
