@@ -25,7 +25,6 @@ export class BasePlayer {
   private _name: string;
   private _winsCount: number;
   private gameboard: Gameboard;
-  private enemies: IEnemyInfo[];
 
   constructor(name: string) {
     if (!name) {
@@ -36,7 +35,6 @@ export class BasePlayer {
     this._winsCount = 0;
     this._id = BasePlayer.idGenerator.nextId();
     this.gameboard = new Gameboard();
-    this.enemies = [];
   }
 
   /** The player's ID. */
@@ -129,13 +127,59 @@ export class BasePlayer {
     return this.gameboard.areAllShipsSunk();
   }
 
-  private isValidPoint(point: IGridPoint) {
+  protected isValidPoint(point: IGridPoint): boolean {
     return (
       point.row >= 0 &&
       point.row < this.getBoardSize() &&
       point.col >= 0 &&
       point.col < this.getBoardSize()
     );
+  }
+}
+
+export class ComputerPlayer extends BasePlayer {
+  private enemies: IEnemyInfo[];
+
+  /** Creates a new automated player */
+  constructor(name: string) {
+    super(name);
+
+    this.enemies = [];
+  }
+
+  /**
+   * @returns A point to attack an enemy and the attacked enemy's ID.
+   *
+   * @throws PlayerError when there are no other players to attack.
+   * */
+  makeMove(): IAttack {
+    if (this.getEnemiesCount() === 0) {
+      throw new PlayerError('There are no enemies to attack');
+    }
+
+    // Get random enemy
+    let enemy: IEnemyInfo;
+    do {
+      enemy = this.getEnemy();
+    } while (!enemy.isAlive);
+
+    // Select attack point
+    let row: number;
+    let col: number;
+    do {
+      row = this.getRandomNumber(0, this.getBoardSize());
+      col = this.getRandomNumber(0, this.getBoardSize());
+    } while (enemy.board[row][col]);
+
+    // Attack!
+    return {
+      attackedPlayerId: enemy.id,
+      attackedPoint: { row, col },
+    };
+  }
+
+  private getRandomNumber(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min)) + min;
   }
 
   /**
@@ -235,47 +279,5 @@ export class BasePlayer {
       const randomIndex = Math.floor(Math.random() * this.getEnemiesCount());
       return _.cloneDeep(this.enemies[randomIndex]);
     }
-  }
-}
-
-export class ComputerPlayer extends BasePlayer {
-  /** Creates a new automated player */
-  constructor(name: string) {
-    super(name);
-  }
-
-  /**
-   * @returns A point to attack an enemy and the attacked enemy's ID.
-   *
-   * @throws PlayerError when there are no other players to attack.
-   * */
-  makeMove(): IAttack {
-    if (this.getEnemiesCount() === 0) {
-      throw new PlayerError('There are no enemies to attack');
-    }
-
-    // Get random enemy
-    let enemy: IEnemyInfo;
-    do {
-      enemy = this.getEnemy();
-    } while (!enemy.isAlive);
-
-    // Select attack point
-    let row: number;
-    let col: number;
-    do {
-      row = this.getRandomNumber(0, this.getBoardSize());
-      col = this.getRandomNumber(0, this.getBoardSize());
-    } while (enemy.board[row][col]);
-
-    // Attack!
-    return {
-      attackedPlayerId: enemy.id,
-      attackedPoint: { row, col },
-    };
-  }
-
-  private getRandomNumber(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min)) + min;
   }
 }
