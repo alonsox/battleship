@@ -1,7 +1,7 @@
 import { ShipType } from './ship-type';
 import { Gameboard, GameboardError } from './gameboard';
-import { Direction } from './enums';
-import { IGridPoint } from './interfaces';
+import { Direction } from '../enums';
+import { IGridPoint } from '../interfaces';
 
 describe('Gameboard', () => {
   let gameboard: Gameboard;

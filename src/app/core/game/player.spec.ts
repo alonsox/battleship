@@ -1,6 +1,6 @@
 import { BasePlayer, ComputerPlayer, PlayerError } from './player';
-import { IGridPoint, IAttack } from './interfaces';
-import { Direction } from './enums';
+import { IGridPoint, IAttack } from '../interfaces';
+import { Direction } from '../enums';
 import { ShipType } from './ship-type';
 
 describe('BasePlayer', () => {

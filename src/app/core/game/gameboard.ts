@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
-import { IBoardCell, IGridPoint } from './interfaces';
-import { Direction } from './enums';
+import { IBoardCell, IGridPoint } from '../interfaces';
+import { Direction } from '../enums';
 import { ShipType } from './ship-type';
 import { Ship } from './ship';
 

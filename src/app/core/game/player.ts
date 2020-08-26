@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 
 import { Gameboard, GameboardError } from './gameboard';
-import { IGridPoint, IBoardCell, IAttackReport, IAttack } from './interfaces';
-import { Direction } from './enums';
+import { IGridPoint, IBoardCell, IAttackReport, IAttack } from '../interfaces';
+import { Direction } from '../enums';
 import { ShipType } from './ship-type';
 import { IdGenerator } from 'src/app/shared/id-generator';
 
