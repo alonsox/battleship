@@ -52,8 +52,11 @@ export class Gameboard {
     // CHECK IF THERE IS SPACE FOR THE SHIP
     if (!this.isValidPoint(point)) {
       throw new GameboardError('The point to add the ship is out of the grid');
-    } else if (!this.doesShipFits(shipType, point, direction)) {
-      throw new GameboardError('The ship does not fit in the board');
+    }
+
+    const result = this.doesShipFits(shipType, point, direction);
+    if (result.error) {
+      throw new GameboardError(result.error);
     }
 
     // ALL OK, ADD THE SHIP
@@ -102,7 +105,7 @@ export class Gameboard {
     shipType: ShipType,
     point: IGridPoint,
     direction: Direction,
-  ): boolean {
+  ): { error?: string } {
     for (let index = 0; index < shipType.size; index++) {
       // Determine the position for the ship's segment
       let row = point.row;
@@ -132,16 +135,16 @@ export class Gameboard {
         col < 0 ||
         col >= this.boardSize
       ) {
-        return false;
+        return { error: 'The ship goes out of the board' };
       }
 
       // The cell is used by another ship
       if (this.board[row][col].shipInfo != null) {
-        return false;
+        return { error: 'The ship overlaps with another ship' };
       }
     }
 
-    return true;
+    return {};
   }
 
   /**
