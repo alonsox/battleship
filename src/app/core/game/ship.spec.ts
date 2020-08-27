@@ -27,7 +27,15 @@ describe('Ship', () => {
     expect(destroyer.size).toBe(2);
   });
 
-  it('Ship get hit properly', () => {
+  it('Ship types are correct', () => {
+    expect(carrier.type).toBe(ShipType.CARRIER.type);
+    expect(battleship.type).toBe(ShipType.BATTLESHIP.type);
+    expect(cruiser.type).toBe(ShipType.CRUISER.type);
+    expect(submarine.type).toBe(ShipType.SUBMARINE.type);
+    expect(destroyer.type).toBe(ShipType.DESTROYER.type);
+  });
+
+  it('Ship gets hit properly', () => {
     ships.forEach((ship) => {
       // -2 and +4 are random numbers, the point of the tests is that it returns
       // true if the ship was hit in a valid position and false otherwise.

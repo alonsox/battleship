@@ -3,12 +3,14 @@ import { ShipType } from './ship-type';
 
 export class Ship {
   private shipID: number;
+  private shipType: string;
   private shipStructure: boolean[];
   private static idCounter = new IdGenerator();
 
   /** Creates a new ship. */
   constructor(shipType: ShipType) {
     this.shipID = Ship.idCounter.nextId();
+    this.shipType = `${shipType.type}`;
     this.shipStructure = new Array(shipType.size).fill(false);
   }
 
@@ -20,6 +22,11 @@ export class Ship {
   /** The ship's size. */
   get size(): number {
     return this.shipStructure.length;
+  }
+
+  /** The type of the ship */
+  get type(): string {
+    return this.shipType;
   }
 
   /**
