@@ -24,8 +24,13 @@ export class BasePlayer {
   private readonly _id: number; // number greater than 0
   private _name: string;
   private _winsCount: number;
-  private gameboard: Gameboard;
+  protected gameboard: Gameboard;
 
+  /**
+   * @param name The name of the new player.
+   *
+   * @throws PlayerError if the name is null, undefined, or an empty string.
+   */
   constructor(name: string) {
     if (!name) {
       throw new PlayerError('The name is null, undefined, or an empty string');
@@ -127,24 +132,52 @@ export class BasePlayer {
     return this.gameboard.areAllShipsSunk();
   }
 
-  protected isValidPoint(point: IGridPoint): boolean {
-    return (
-      point.row >= 0 &&
-      point.row < this.getBoardSize() &&
-      point.col >= 0 &&
-      point.col < this.getBoardSize()
-    );
+  /**
+   * Resets the board, does not change scores.
+   */
+  prepareForNewRound(): void {
+    this.gameboard.reset();
+  }
+
+  /**
+   * Resets both the score and the board.
+   */
+  prepareForNewGame(): void {
+    this.prepareForNewRound();
+    this._winsCount = 0;
   }
 }
 
 export class ComputerPlayer extends BasePlayer {
   private enemies: IEnemyInfo[];
 
-  /** Creates a new automated player */
+  /**
+   * Creates a new automated player
+   *
+   * @param name The name of the new player.
+   *
+   * @throws PlayerError if the name is null, undefined, or an empty string.
+   */
   constructor(name: string) {
     super(name);
 
     this.enemies = [];
+  }
+
+  /**
+   * Resets the board and enemy tracking, does not change scores.
+   */
+  prepareForNewRound(): void {
+    this.gameboard.reset();
+
+    this.enemies.forEach((enemy: IEnemyInfo) => {
+      enemy.isAlive = true;
+      enemy.board.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+          enemy.board[rowIndex][colIndex] = false;
+        });
+      });
+    });
   }
 
   /**
@@ -215,7 +248,7 @@ export class ComputerPlayer extends BasePlayer {
     );
 
     // Mark the attack
-    if (enemy.board && this.isValidPoint(attackedPoint)) {
+    if (enemy.board && this.gameboard.isValidPoint(attackedPoint)) {
       enemy.board[attackedPoint.row][attackedPoint.col] = true;
     }
 
