@@ -2,7 +2,7 @@ import { TrackingBoard } from './tracking-board';
 import { BoardError } from './game-errors';
 import { CellState } from '../enums';
 
-fdescribe('TrackingBoard', () => {
+describe('TrackingBoard', () => {
   const enemyId = 8;
   let trackingBoard: TrackingBoard;
 
