@@ -1,4 +1,5 @@
-import { MessageStatus } from './enums';
+import { MessageStatus, Direction, CellState } from './enums';
+import { ShipType } from './game/ship-type';
 
 export interface IMessage {
   body: string;
@@ -7,13 +8,19 @@ export interface IMessage {
 
 export interface IBoardCell {
   // true for hit, false otherwise
-  hit: boolean;
+  state: CellState;
 
   // Ship info (null there is no ship on the board)
   shipInfo: null | {
     readonly shipId: number;
     readonly shipSegment: number;
   };
+}
+
+export interface IShipSpec {
+  shipType: ShipType;
+  position: IGridPoint;
+  direction: Direction;
 }
 
 export interface IGridPoint {

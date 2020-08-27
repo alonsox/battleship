@@ -10,3 +10,14 @@ export enum MessageStatus {
   Warning = 'warning',
   OK = 'ok',
 }
+
+export enum GamePhase {
+  Battling = 'battling',
+  GameOver = 'game over',
+  PreGame = 'pre game',
+}
+
+export enum CellState {
+  Hit = 'hit',
+  NotHit = 'not hit',
+}
