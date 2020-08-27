@@ -258,4 +258,41 @@ describe('Gameboard', () => {
       });
     });
   });
+
+  it('#isValidPoint does its job', () => {
+    // NULL OR UNDEFINED
+    expect(gameboard.isValidPoint(null)).toBeFalse();
+    expect(gameboard.isValidPoint(undefined)).toBeFalse();
+
+    // POINTS OUTSIDE THE GRID
+    expect(gameboard.isValidPoint({ row: -12, col: 0 })).toBeFalse();
+    expect(gameboard.isValidPoint({ row: 0, col: -23 })).toBeFalse();
+    expect(gameboard.isValidPoint({ row: 0, col: gameboard.size })).toBeFalse();
+    expect(gameboard.isValidPoint({ row: gameboard.size, col: 0 })).toBeFalse();
+
+    // POINTS INSIDE THE GRID
+    expect(gameboard.isValidPoint({ row: 0, col: 0 })).toBeTrue();
+    expect(gameboard.isValidPoint({ row: 3, col: 5 })).toBeTrue();
+    expect(gameboard.isValidPoint({ row: 7, col: 2 })).toBeTrue();
+  });
+
+  it('#hasShip returns 0 on null or undefined ship type', () => {
+    expect(gameboard.hasShip(null)).toBe(0);
+    expect(gameboard.hasShip(undefined)).toBe(0);
+  });
+
+  it('#hasShip returns the correct number', () => {
+    // SETUP
+    gameboard.addShip(ShipType.CRUISER, { row: 0, col: 0 }, Direction.Right);
+    gameboard.addShip(ShipType.CRUISER, { row: 1, col: 0 }, Direction.Right);
+    gameboard.addShip(ShipType.BATTLESHIP, { row: 2, col: 0 }, Direction.Right);
+
+    // Ship that has not been added
+    expect(gameboard.hasShip(ShipType.DESTROYER)).toBe(0);
+    expect(gameboard.hasShip(ShipType.SUBMARINE)).toBe(0);
+
+    // Ship that has been added
+    expect(gameboard.hasShip(ShipType.CRUISER)).toBe(2);
+    expect(gameboard.hasShip(ShipType.BATTLESHIP)).toBe(1);
+  });
 });

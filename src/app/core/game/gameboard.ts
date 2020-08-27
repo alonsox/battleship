@@ -92,7 +92,16 @@ export class Gameboard {
     }
   }
 
-  private isValidPoint(point: IGridPoint) {
+  /**
+   * @param point The point to test.
+   *
+   * @returns true if the point is in the grid; false if not.
+   */
+  isValidPoint(point: IGridPoint): boolean {
+    if (!point) {
+      return false;
+    }
+
     return (
       point.row >= 0 &&
       point.row < this.boardSize &&
@@ -180,6 +189,20 @@ export class Gameboard {
    */
   areAllShipsSunk(): boolean {
     return this.aliveShips === 0;
+  }
+
+  /**
+   * @param shipType The ship type to search.
+   *
+   * @returns A number indicating how many ships of such type are in the board.
+   * If the ship type is null or undefined it returns 0.
+   */
+  hasShip(shipType: ShipType): number {
+    if (!shipType) {
+      return 0;
+    }
+
+    return this.ships.filter((ship) => ship.type === shipType.type).length;
   }
 
   /**
