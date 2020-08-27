@@ -1,33 +1,50 @@
 import * as _ from 'lodash';
 
-import { IBoardCell, IGridPoint } from '../interfaces';
-import { Direction } from '../enums';
+import { IBoardCell, IGridPoint, IShipSpec } from '../interfaces';
+import { Direction, CellState } from '../enums';
 import { ShipType } from './ship-type';
 import { Ship } from './ship';
+import { Board } from './board';
+import { BoardError } from './game-errors';
 
-export class GameboardError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'GameboardError';
-  }
-}
-
-export class Gameboard {
+/** The board where the players put their ships and get attacked. */
+export class Gameboard extends Board {
   private ships: Ship[];
-  private readonly boardSize = 10;
   private board: IBoardCell[][];
 
   /** Creates a new Gameboard */
   constructor() {
+    super();
+
+    // SHIPS
     this.ships = [];
+
+    // INITIALIZE BOARD
     this.board = [];
-    for (let i = 0; i < this.boardSize; i++) {
+    for (let row = 0; row < this.height; row++) {
       const newRow: IBoardCell[] = [];
-      for (let j = 0; j < this.boardSize; j++) {
-        newRow.push({ hit: false, shipInfo: null });
+      for (let col = 0; col < this.width; col++) {
+        newRow.push({ state: CellState.NotHit, shipInfo: null });
       }
       this.board.push(newRow);
     }
+  }
+
+  /** The number of ships on the board.  */
+  get shipsCount(): number {
+    return this.ships.length;
+  }
+
+  /** The number of ships that have not been sunk yet. */
+  get aliveShipsCount(): number {
+    return this.ships.reduce((aliveShipsCount: number, currentShip: Ship) => {
+      return currentShip.isSunk() ? aliveShipsCount : aliveShipsCount + 1;
+    }, 0);
+  }
+
+  /** @returns A copy of the board. */
+  getBoardCopy(): IBoardCell[][] {
+    return _.cloneDeep(this.board);
   }
 
   /**
@@ -37,37 +54,24 @@ export class Gameboard {
    * @param point Point to put the ship.
    * @param direction Direction to put the ship.
    *
-   * @throws GameboardError if the ship could not be added.
+   * @throws GameboardError if the ship cannot be added.
    */
-  addShip(shipType: ShipType, point: IGridPoint, direction: Direction): void {
-    // BASIC VALIDATION
-    if (!shipType) {
-      throw new GameboardError('The type of the ship is null or undefined');
-    } else if (!point) {
-      throw new GameboardError('The point is null or undefined');
-    } else if (!direction) {
-      throw new GameboardError('The direction is null or undefined');
-    }
-
-    // CHECK IF THERE IS SPACE FOR THE SHIP
-    if (!this.isValidPoint(point)) {
-      throw new GameboardError('The point to add the ship is out of the grid');
-    }
-
-    const result = this.doesShipFits(shipType, point, direction);
-    if (result.error) {
-      throw new GameboardError(result.error);
+  addShip(shipSpec: IShipSpec): void {
+    // VALIDATION
+    const result = this.isSafeToAddShip(shipSpec);
+    if (result !== null) {
+      throw result;
     }
 
     // ALL OK, ADD THE SHIP
-    const newShip = new Ship(shipType);
+    const newShip = new Ship(shipSpec.shipType);
     this.ships.push(newShip);
 
     for (let index = 0; index < newShip.size; index++) {
       // Determine position
-      let row = point.row;
-      let col = point.col;
-      switch (direction as Direction) {
+      let row = shipSpec.position.row;
+      let col = shipSpec.position.col;
+      switch (shipSpec.direction as Direction) {
         case Direction.Up:
           row -= index;
           break;
@@ -93,32 +97,53 @@ export class Gameboard {
   }
 
   /**
-   * @param point The point to test.
+   * Checks if a ship can be safely added to the board or not.
    *
-   * @returns true if the point is in the grid; false if not.
+   * @param shipSpec The specification of where and how the ship will be added.
+   *
+   * @returns null if the ship fits with no errors, otherwise the error of why
+   * the ship does not fit properly.
    */
-  isValidPoint(point: IGridPoint): boolean {
-    if (!point) {
-      return false;
+  isSafeToAddShip(shipSpec: IShipSpec): BoardError {
+    // CHECK IF THE SPECIFICATION IS NULL OR UNDEFINED
+    if (!shipSpec) {
+      return new BoardError('No ship specification provided');
     }
 
-    return (
-      point.row >= 0 &&
-      point.row < this.boardSize &&
-      point.col >= 0 &&
-      point.col < this.boardSize
-    );
+    // CHECK IF THE SPECIFICATION'S PROPERTIES ARE NULL OR UNDEFINED
+    if (!shipSpec.shipType) {
+      return new BoardError('The type of the ship is null or undefined');
+    } else if (!shipSpec.position) {
+      return new BoardError('The position is null or undefined');
+    } else if (!shipSpec.direction) {
+      return new BoardError('The direction is null or undefined');
+    }
+
+    // CHECK IF THE SHIP IS ADDED INSIDE THE GRID
+    if (!this.isValidPoint(shipSpec.position)) {
+      return new BoardError('The point to add the ship is out of the grid');
+    }
+
+    // CHECKS IF IT GETS OUT OF THE BOARD OR OVERLAPS WITH ANOTHER SHIP
+    return this.doesShipFits(shipSpec);
   }
 
-  private doesShipFits(
-    shipType: ShipType,
-    point: IGridPoint,
-    direction: Direction,
-  ): { error?: string } {
+  /**
+   * Checks if a ship overlaps with other ship or if the ship gets out of the
+   * board.
+   *
+   * @param shipSpec The specification of where and how the ship will be added.
+   *
+   * @returns null if the ship fits with no errors, otherwise the error of why
+   * the ship does not fit properly.
+   */
+  private doesShipFits(shipSpec: IShipSpec): BoardError {
+    const { shipType, position, direction } = shipSpec;
+
     for (let index = 0; index < shipType.size; index++) {
       // Determine the position for the ship's segment
-      let row = point.row;
-      let col = point.col;
+      let row = position.row;
+      let col = position.col;
 
       switch (direction as Direction) {
         case Direction.Up:
@@ -138,46 +163,40 @@ export class Gameboard {
       }
 
       // The ship segment is out of the board
-      if (
-        row < 0 ||
-        row >= this.boardSize ||
-        col < 0 ||
-        col >= this.boardSize
-      ) {
-        return { error: 'The ship goes out of the board' };
+      if (!this.isValidPoint({ row, col })) {
+        return new BoardError('The ship goes out of the board');
       }
 
       // The cell is used by another ship
       if (this.board[row][col].shipInfo != null) {
-        return { error: 'The ship overlaps with another ship' };
+        return new BoardError('The ship overlaps with another ship');
       }
     }
 
-    return {};
+    // ALL OK
+    return null;
   }
 
   /**
    * Receives an attack from an enemy.
    *
-   * @param point The point where the attack was made.
+   * @param position The point where the attack was made.
    *
    * @throws GameboardError if the attack is out of the grid or the point is
    * invalid.
    */
-  receiveAttack(point: IGridPoint): void {
-    if (!point) {
-      throw new GameboardError('The attack point is null or undefined');
+  receiveAttack(position: IGridPoint): void {
+    if (!position) {
+      throw new BoardError('The attack point is null or undefined');
     }
 
-    if (!this.isValidPoint(point)) {
-      throw new GameboardError(
-        'Cannot receive an attack in a point outside the grid',
-      );
+    if (!this.isValidPoint(position)) {
+      throw new BoardError('Cannot receive an attack in an invalid position');
     }
 
     // Attack the grid
-    const attackedCell = this.board[point.row][point.col];
-    attackedCell.hit = true;
+    const attackedCell = this.board[position.row][position.col];
+    attackedCell.state = CellState.Hit;
     if (attackedCell.shipInfo) {
       const { shipId, shipSegment } = attackedCell.shipInfo;
       this.ships.find((ship) => ship.id === shipId).hit(shipSegment);
@@ -188,10 +207,12 @@ export class Gameboard {
    * @returns true if all the ships in the board are sunk; false otherwise.
    */
   areAllShipsSunk(): boolean {
-    return this.aliveShips === 0;
+    return this.aliveShipsCount === 0;
   }
 
   /**
+   * Indicate how many types of a certain ship are in the board.
+   *
    * @param shipType The ship type to search.
    *
    * @returns A number indicating how many ships of such type are in the board.
@@ -205,56 +226,17 @@ export class Gameboard {
     return this.ships.filter((ship) => ship.type === shipType.type).length;
   }
 
-  /**
-   * Removes all the ships and attacks from the board.
-   */
+  /** Removes all the ships and attacks from the board. */
   reset(): void {
     // Delete ships
-    this.ships = [];
+    this.ships.splice(0, this.ships.length);
 
     // Reset board
     this.board.forEach((row) => {
       row.forEach((cell) => {
-        cell.hit = false;
+        cell.state = CellState.NotHit;
         cell.shipInfo = null;
       });
     });
-  }
-
-  /**
-   * @returns A copy of the board.
-   */
-  getBoardCopy(): IBoardCell[][] {
-    return _.cloneDeep(this.board);
-  }
-
-  /**
-   * The size of the board.
-   */
-  get size(): number {
-    return this.boardSize;
-  }
-
-  /**
-   * The number of ships on the board.
-   */
-  get availableShips(): number {
-    return this.ships.length;
-  }
-
-  /**
-   * The number of sunk ships.
-   */
-  get sunkShips(): number {
-    return this.ships.reduce((sunkShipCount, currentShip) => {
-      return currentShip.isSunk() ? sunkShipCount + 1 : sunkShipCount;
-    }, 0);
-  }
-
-  /**
-   * The number of ships that have not been sunk yet.
-   */
-  get aliveShips(): number {
-    return this.availableShips - this.sunkShips;
   }
 }
