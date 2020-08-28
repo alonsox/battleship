@@ -54,7 +54,7 @@ export class Gameboard extends Board {
    * @param point Point to put the ship.
    * @param direction Direction to put the ship.
    *
-   * @throws GameboardError if the ship cannot be added.
+   * @throws BoardError if the ship cannot be added.
    */
   addShip(shipSpec: IShipSpec): void {
     // VALIDATION
@@ -182,7 +182,7 @@ export class Gameboard extends Board {
    *
    * @param position The point where the attack was made.
    *
-   * @throws GameboardError if the attack is out of the grid or the point is
+   * @throws BoardError if the attack is out of the grid or the point is
    * invalid.
    */
   receiveAttack(position: IGridPoint): void {
