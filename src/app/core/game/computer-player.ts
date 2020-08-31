@@ -111,7 +111,7 @@ export class ComputerPlayer extends Player {
     }
 
     // Kill the player (if necessary)
-    if (attackReport.hasAttackedPlayerLost) {
+    if (attackReport.hasVictimLost) {
       attackedEnemy.killEnemy();
     }
   }

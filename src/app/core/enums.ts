@@ -12,12 +12,18 @@ export enum MessageStatus {
 }
 
 export enum GamePhase {
-  Battling = 'battling',
-  GameOver = 'game over',
-  PreGame = 'pre game',
+  /** The game is a phase were changes can be made, e.g., add new players. */
+  NotPlaying = 'not playing',
+  /** The game is ongoing and the players attacks each other */
+  Playing = 'playing',
 }
 
 export enum CellState {
   Hit = 'hit',
   NotHit = 'not hit',
+}
+
+export enum PlayerType {
+  Person = 'person',
+  Computer = 'computer',
 }

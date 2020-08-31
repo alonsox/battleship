@@ -1,5 +1,7 @@
-import { MessageStatus, Direction, CellState } from './enums';
+import { MessageStatus, Direction, CellState, PlayerType } from './enums';
 import { ShipType } from './game/ship-type';
+import { Player } from './game/player';
+import { Gameboard } from './game/gameboard';
 
 export interface IMessage {
   body: string;
@@ -29,10 +31,24 @@ export interface IGridPoint {
 }
 
 export interface IAttack {
-  attackedPlayerId: number;
-  attackedPoint: IGridPoint;
+  victimId: number;
+  attackPoint: IGridPoint;
 }
 
 export interface IAttackReport extends IAttack {
-  hasAttackedPlayerLost: boolean;
+  hasVictimLost: boolean;
+}
+
+/** The credentials to use the game service */
+export interface Credential {
+  id: number;
+  key: string;
+}
+
+/** Represents a player inside the GameService */
+export interface GameUser {
+  key: string;
+  playerType: PlayerType;
+  player: Player;
+  board: Gameboard;
 }

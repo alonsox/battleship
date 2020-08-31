@@ -69,7 +69,7 @@ describe('ComputerPlayer', () => {
           computerPlayer.receiveAttackReport({
             victimId: secondPlayer.id,
             attackPoint: { row, col },
-            hasAttackedPlayerLost: false,
+            hasVictimLost: false,
           });
         }
       }
@@ -89,7 +89,7 @@ describe('ComputerPlayer', () => {
     computerPlayer.receiveAttackReport({
       attackPoint: { row: 0, col: 0 },
       victimId: secondPlayer.id,
-      hasAttackedPlayerLost: true,
+      hasVictimLost: true,
     });
 
     // ASSERT

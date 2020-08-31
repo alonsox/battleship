@@ -226,6 +226,10 @@ export class Gameboard extends Board {
     return this.ships.filter((ship) => ship.type === shipType.type).length;
   }
 
+  wasCellAttacked(point: IGridPoint): boolean {
+    return this.board[point.row][point.col].state === CellState.Hit;
+  }
+
   /** Removes all the ships and attacks from the board. */
   reset(): void {
     // Delete ships
