@@ -1,0 +1,23 @@
+<h3>{{ playerName }}</h3>
+
+<table>
+  <tr>
+    <td class="basic-cell"></td>
+    <td 
+      *ngFor="let row of playerBoard; let i = index" 
+      class="basic-cell"
+    >
+      {{i + 1}}
+    </td>
+  </tr>
+  <tr *ngFor="let row of playerBoard; let i = index">
+    <td class="basic-cell">{{i + 1}}</td>
+    <td 
+      *ngFor="let cell of row; let j = index"
+      class="basic-cell"
+      [ngClass]="getCellClass(cell)"
+    >
+    </td>
+  </tr>
+</table>
+

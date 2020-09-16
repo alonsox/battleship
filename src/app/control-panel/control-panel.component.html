@@ -1,0 +1,71 @@
+<!-- TODO: Do not display once the game has started -->
+<div class="container">
+  <form 
+    [formGroup]="shipInfoForm" 
+    (ngSubmit)="onSubmit()"
+    *ngIf="!gameOngoing"
+  >
+    <label>
+      Row:
+      <select formControlName="row">
+        <option 
+          *ngFor="let value of rows" 
+          value="{{value}}"
+        >
+        {{value}}
+      </option>
+      </select>
+    </label>
+      
+    <label>
+      Column:
+      <select formControlName="column">
+        <option 
+          *ngFor="let value of cols" 
+          value="{{value}}"
+        >
+        {{value}}
+      </option>
+      </select>
+    </label>
+    
+    <label>
+      Direction:
+      <select formControlName="direction">
+        <option
+          *ngFor="let dir of directions"
+          value="{{dir}}"
+        >{{dir}}
+      </option>
+      </select>
+    </label>
+    
+    
+    <label>
+      Ship Type
+      <select formControlName="shipType">
+        <option 
+          *ngFor="let ship of shipTypes" 
+          value="{{ship.type}}"
+        >
+          {{ship.type}} (size: {{ship.size}})
+        </option>
+      </select>
+    </label>
+    
+    <button type="submit">Add ship</button>
+  </form>
+
+  <button 
+    [disabled]="gameOngoing"
+    (click)="onStartGame()"
+  >
+    Start Game
+  </button>
+  <button 
+    [disabled]="gameOngoing"
+    (click)="onNewRound()"
+  >
+    New Round
+  </button>
+</div>

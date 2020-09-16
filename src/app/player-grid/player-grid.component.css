@@ -1,0 +1,24 @@
+.basic-cell {
+  height: 1.5rem;
+  width: 1.5rem;
+  background-color: white;
+  border: 1px solid black;
+  display: inline-block;
+  text-align: center;
+}
+
+.empty-cell {
+  background-color: lightgray;
+}
+
+.empty-cell-hit {
+  background-color: gray;
+}
+
+.ship-cell {
+  background-color: dodgerblue;
+}
+
+.ship-cell-hit {
+  background-color: red;
+}

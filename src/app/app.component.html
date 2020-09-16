@@ -1,1 +1,7 @@
-<h1>Battleship</h1>
+<app-header></app-header>
+<app-control-panel></app-control-panel>
+<app-message-banner></app-message-banner>
+<div>  
+  <app-player-grid (humanPlayerIdEvent)="setHumanPlayerId($event)"></app-player-grid>
+  <app-computer-grid [otherPlayerId]="humanPlayerId"></app-computer-grid>
+</div>

@@ -34,6 +34,7 @@ export class GameService {
   private currentPlayer$ = new Subject<number>();
   private gamePhase$ = new BehaviorSubject<GamePhase>(GamePhase.NotPlaying);
   private attackReport$ = new Subject<IAttackReport>();
+  private newRoundNotifier = new Subject<void>();
 
   constructor(
     private messageService: MessageService,
@@ -189,7 +190,7 @@ export class GameService {
    * @param credential The user's ID and key.
    * @param shipSpec The details about the ship being added.
    */
-  addShip(credential: Credential, shipSpec: IShipSpec): void {
+  addShip(credential: Credential, shipSpec: IShipSpec): boolean {
     // VERIFY WE ARE IN THE ColdWar PHASE, IF NOT => DO NOTHING
     // if (this.gamePhase !== GamePhase.ColdWar) {
     //   return;
@@ -201,7 +202,7 @@ export class GameService {
         body: 'The credentials are null or undefined',
         status: MessageStatus.Error,
       });
-      return;
+      return false;
     }
 
     // VALIDATE CREDENTIALS
@@ -211,7 +212,7 @@ export class GameService {
         body: 'Cannot add ship to not existing user',
         status: MessageStatus.Error,
       });
-      return;
+      return false;
     }
 
     // DOES NOT ADD SHIPS TO COMPUTER PLAYERS
@@ -220,7 +221,7 @@ export class GameService {
         body: 'Cannot add ship to computer player',
         status: MessageStatus.Error,
       });
-      return;
+      return false;
     }
 
     // CHECK EACH PLAYER HAS THE CORRECT NUMBER AND TYPE OF SHIPS
@@ -231,19 +232,20 @@ export class GameService {
         body: `There is already a "${shipSpec.shipType.type}" in the board`,
         status: MessageStatus.Error,
       });
-      return;
+      return false;
     }
 
     // ADD SHIP
     try {
       /* NOTE: This function checks that the ship specification is valid. */
       user.board.addShip(shipSpec);
+      return true;
     } catch (e) {
       this.messageService.send({
         body: (e as BoardError).message,
         status: MessageStatus.Error,
       });
-      return;
+      return false;
     }
   }
 
@@ -379,9 +381,6 @@ export class GameService {
       return;
     }
 
-    // CHANGE PHASE TO Playing
-    this.changeGamePhase(GamePhase.Playing);
-
     // CHECK ALL PLAYERS HAVE THE CORRECT TYPE OF SHIPS
     if (!this.playersHaveAllShips()) {
       this.messageService.send({
@@ -393,6 +392,15 @@ export class GameService {
 
     // Set the current player
     this.changeCurrentPlayer();
+
+    // CHANGE PHASE TO Playing
+    this.changeGamePhase(GamePhase.Playing);
+
+    const currentUser = this.users[this.currentPlayerIndex];
+    if (currentUser.playerType === PlayerType.Computer) {
+      const attack = (currentUser.player as ComputerPlayer).attack();
+      this.attack(currentUser.player.id, attack.victimId, attack.attackPoint);
+    }
   }
 
   /** Resets boards but no scores, games enter in ColdWar phase */
@@ -409,6 +417,9 @@ export class GameService {
 
     // Change phase to NotPlaying
     this.changeGamePhase(GamePhase.NotPlaying);
+
+    // Notify new round
+    this.newRoundNotifier.next();
   }
 
   /** Resets scores and boards, game enters in ColdWar phase */
@@ -481,5 +492,9 @@ export class GameService {
   /** The observable's value is the current game phase. */
   getGamePhase(): Observable<GamePhase> {
     return this.gamePhase$.asObservable();
+  }
+
+  getNewRoundNotification(): Observable<void> {
+    return this.newRoundNotifier.asObservable();
   }
 }

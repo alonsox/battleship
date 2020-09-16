@@ -1,0 +1,24 @@
+<h3>{{ computerName }}</h3>
+
+<table>
+  <tr>
+    <td class="basic-cell"></td>
+    <td 
+      *ngFor="let row of computerBoard; let i = index" 
+      class="basic-cell"
+    >
+      {{i + 1}}
+    </td>
+  </tr>
+  <tr *ngFor="let row of computerBoard; let i = index">
+    <td class="basic-cell">{{i + 1}}</td>
+    <td 
+      *ngFor="let cell of row; let j = index"
+      class="basic-cell" 
+      (click)="cellClicked(i, j)"
+      [ngClass]="getCellClass(cell)"
+    >
+    </td>
+  </tr>
+</table>
+

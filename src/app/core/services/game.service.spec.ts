@@ -121,97 +121,88 @@ describe('GameService', () => {
       };
     });
 
-    it('Sends error when adding ship with null or undefined parameters', () => {
+    it('Returns false when adding ship with null or undefined parameters', () => {
       /* NOTE: Here badCredential and badShipSpec are used only to pass
        * something not null */
 
-      gameService.addShip(null, null); // +1 call to MessageService
-      gameService.addShip(badCredential, null); // +1 call to MessageService
-      gameService.addShip(null, badShipSpec); // +1 call to MessageService
+      expect(gameService.addShip(null, null)).toBeFalse();
+      expect(gameService.addShip(badCredential, null)).toBeFalse();
+      expect(gameService.addShip(null, badShipSpec)).toBeFalse();
 
-      gameService.addShip(undefined, undefined); // +1 call to MessageService
-      gameService.addShip(badCredential, undefined); // +1 call to MessageService
-      gameService.addShip(undefined, badShipSpec); // +1 call to MessageService
-
-      // ASSERT
-      expect(messageServiceSpy.send.calls.count()).toBe(
-        6,
-        'Calls message service with null or undefined parameters',
-      );
+      expect(gameService.addShip(undefined, undefined)).toBeFalse();
+      expect(gameService.addShip(badCredential, undefined)).toBeFalse();
+      expect(gameService.addShip(undefined, badShipSpec)).toBeFalse();
     });
 
-    it('Sends error when the credential is bad', () => {
-      gameService.addShip(badCredential, {
-        shipType: ShipType.DESTROYER,
-        direction: Direction.Right,
-        position: { row: 0, col: 0 },
-      });
-
-      // ASSERT
-      expect(messageServiceSpy.send.calls.count()).toBe(
-        1,
-        'Only the credentials are invalid',
-      );
+    it('Returns false when the credential is bad', () => {
+      expect(
+        gameService.addShip(badCredential, {
+          shipType: ShipType.DESTROYER,
+          direction: Direction.Right,
+          position: { row: 0, col: 0 },
+        }),
+      ).toBeFalse();
     });
 
-    it('Sends error when with invalid ship specification parameters', () => {
-      // This player is to make the credentials valid
-      const player = gameService.createPlayer('player'); // +1 call to MessageService
+    it('Returns false with invalid ship specification parameters', () => {
+      const player = gameService.createPlayer('player');
 
-      gameService.addShip(player, badShipSpec); // +1 call to MessageService
-
-      // ASSERT
-      expect(messageServiceSpy.send.calls.count()).toBe(
-        2,
-        'Calls message service when the ship spec is  invalid',
-      );
+      expect(gameService.addShip(player, badShipSpec)).toBeFalse();
     });
 
-    it('Sends error when ships overlaps', () => {
-      // This player is to make the credentials valid
-      const player = gameService.createPlayer('player'); // +1 call to MessageService
+    it('Returns true when the ship is added correctly', () => {
+      const player = gameService.createPlayer('player');
+      expect(
+        gameService.addShip(player, {
+          shipType: ShipType.CARRIER,
+          direction: Direction.Right,
+          position: { row: 0, col: 0 },
+        }),
+      ).toBeTrue();
+    });
+
+    it('Returns false when the ships overlaps', () => {
+      const player = gameService.createPlayer('player');
 
       // This is OK
-      gameService.addShip(player, {
-        shipType: ShipType.CARRIER,
-        direction: Direction.Right,
-        position: { row: 0, col: 0 },
-      });
+      expect(
+        gameService.addShip(player, {
+          shipType: ShipType.CARRIER,
+          direction: Direction.Right,
+          position: { row: 0, col: 0 },
+        }),
+      ).toBeTrue();
 
-      // +1 call to MessageService
-      gameService.addShip(player, {
-        shipType: ShipType.BATTLESHIP,
-        direction: Direction.Right,
-        position: { row: 0, col: 2 },
-      });
-
-      // ASSERT
-      expect(messageServiceSpy.send.calls.count()).toBe(2, 'Ships overlap');
+      // This overlaps
+      expect(
+        gameService.addShip(player, {
+          shipType: ShipType.BATTLESHIP,
+          direction: Direction.Right,
+          position: { row: 0, col: 2 },
+        }),
+      ).toBeFalse();
     });
 
     it('Does not allow to add the same ship twice', () => {
-      // This player is to make the credentials valid
-      const player = gameService.createPlayer('player'); // +1 call to MessageService
+      const player = gameService.createPlayer('player');
 
       // This is OK
-      gameService.addShip(player, {
-        shipType: ShipType.CARRIER,
-        direction: Direction.Right,
-        position: { row: 0, col: 0 },
-      });
+      expect(
+        gameService.addShip(player, {
+          shipType: ShipType.CARRIER,
+          direction: Direction.Right,
+          position: { row: 0, col: 0 },
+        }),
+      ).toBeTrue();
 
       // +1 call to MessageService
-      gameService.addShip(player, {
-        shipType: ShipType.CARRIER,
-        direction: Direction.Right,
-        position: { row: 2, col: 0 },
-      });
-
-      // ASSERT
-      expect(messageServiceSpy.send.calls.count()).toBe(
-        2,
-        'Adding the same ship twice',
-      );
+      expect(
+        gameService.addShip(player, {
+          shipType: ShipType.CARRIER,
+          direction: Direction.Right,
+          position: { row: 2, col: 0 },
+        }),
+      ).toBeFalse();
     });
 
     it('Allows at most 5 ships in the board', () => {
@@ -221,28 +212,26 @@ describe('GameService', () => {
 
       // Add one ship of each type
       ships.forEach((ship, index) => {
-        gameService.addShip(player, {
-          shipType: ship,
-          direction: Direction.Right,
-          position: { row: index, col: 0 },
-        });
+        expect(
+          gameService.addShip(player, {
+            shipType: ship,
+            direction: Direction.Right,
+            position: { row: index, col: 0 },
+          }),
+        ).toBeTrue();
       });
 
       // Error: +1 call to MessageService
-      gameService.addShip(player, {
-        shipType: ShipType.DESTROYER,
-        direction: Direction.Right,
-        position: { row: 6, col: 0 },
-      });
-
-      // ASSERT
-      expect(messageServiceSpy.send.calls.count()).toBe(
-        2,
-        'Adding the same ship twice',
-      );
+      expect(
+        gameService.addShip(player, {
+          shipType: ShipType.DESTROYER,
+          direction: Direction.Right,
+          position: { row: 6, col: 0 },
+        }),
+      ).toBeFalse();
     });
 
-    it('Sends error when adding ships for computer players', () => {
+    it('Returns false when adding ships for computer players', () => {
       // +1 call
       const computerPlayer = gameService.createPlayer(
         'pc',
@@ -250,16 +239,13 @@ describe('GameService', () => {
       );
 
       // +1 call
-      gameService.addShip(computerPlayer, {
-        shipType: ShipType.DESTROYER,
-        direction: Direction.Right,
-        position: { row: 0, col: 0 },
-      });
-
-      expect(messageServiceSpy.send.calls.count()).toBe(
-        2,
-        'Does not add ships to computer  players',
-      );
+      expect(
+        gameService.addShip(computerPlayer, {
+          shipType: ShipType.DESTROYER,
+          direction: Direction.Right,
+          position: { row: 0, col: 0 },
+        }),
+      ).toBeFalse();
     });
   });
 
